@@ -5,15 +5,14 @@
         "lib": ["ESNext"],
         "moduleResolution": "node",
         "strict": false,
+        "strictNullChecks": true,
         "types": ["@jackmacwindows/lua-types/cc", "@jackmacwindows/craftos-types", "@jackmacwindows/cc-types"]
     },
     "tstl": {
         "luaTarget": "CC",
         "luaLibImport": "inline",
-        "luaBundle": "main.lua",
-        "luaBundleEntry": "main.ts"
+        "luaBundle": "dist/startup.lua",
+        "luaBundleEntry": "src/startup.ts"
     },
-    "include": [
-        "./*.ts"
-    ]
+    "include": ["./src/**/*.ts", "event.ts"]
 }
