@@ -1,89 +1,77 @@
 import { TurbinePeripheral } from "./Peripheral";
 
 export class Turbine {
-    private turbinePeripheral: TurbinePeripheral;
+  constructor(private turbinePeripheral: TurbinePeripheral) {}
 
-    constructor(private name: string) {
-        this.turbinePeripheral = peripheral.wrap(name) as TurbinePeripheral;
-    }
+  getName() {
+    return peripheral.getName(this.turbinePeripheral);
+  }
 
-    getName() {
-        return this.name;
-    }
+  getIsActive() {
+    return this.turbinePeripheral.getActive();
+  }
 
-    getApiVersion() {
-        return this.turbinePeripheral.apiVersion();
-    }
+  setIsActive(active: boolean) {
+    this.turbinePeripheral.setActive(active);
+  }
 
-    getIsConnected() {
-        return this.turbinePeripheral.connected();
-    }
+  getEnergyStored() {
+    return this.turbinePeripheral.getEnergyStored();
+  }
 
-    getIsActive() {
-        return this.turbinePeripheral.active();
-    }
+  getEnergyCapacity() {
+    return this.turbinePeripheral.getEnergyCapacity();
+  }
 
-    setIsActive(active: boolean) {
-        this.turbinePeripheral.setActive(active);
-    }
+  getEnergyProduced() {
+    return this.turbinePeripheral.getEnergyProducedLastTick();
+  }
 
-    getEnergyStored() {
-        return this.turbinePeripheral.battery().stored();
-    }
+  getRotorSpeed() {
+    return this.turbinePeripheral.getRotorSpeed();
+  }
 
-    getEnergyCapacity() {
-        return this.turbinePeripheral.battery().capacity();
-    }
+  getRotorEfficiency() {
+    return this.turbinePeripheral.getBladeEfficiency();
+  }
 
-    getEnergyProduced() {
-        return this.turbinePeripheral.battery().producedLastTick();
-    }
+  getSteamStored() {
+    return this.turbinePeripheral.getInputAmount();
+  }
 
-    getRotorSpeed() {
-        return this.turbinePeripheral.rotor().RPM();
-    }
+  getSteamCapacity() {
+    return this.turbinePeripheral.getFluidAmountMax();
+  }
 
-    getRotorEfficiency() {
-        return this.turbinePeripheral.rotor().efficiencyLastTick();
-    }
+  getWaterStored() {
+    return this.turbinePeripheral.getOutputAmount();
+  }
 
-    getSteamStored() {
-        return this.turbinePeripheral.fluidTank().input().amount();
-    }
+  getWaterCapacity() {
+    return this.turbinePeripheral.getFluidAmountMax();
+  }
 
-    getSteamCapacity() {
-        return this.turbinePeripheral.fluidTank().input().maxAmount();
-    }
+  getFlowRate() {
+    return this.turbinePeripheral.getFluidFlowRate();
+  }
 
-    getWaterStored() {
-        return this.turbinePeripheral.fluidTank().output().amount();
-    }
+  getTargetFlowRate() {
+    return this.turbinePeripheral.getFluidFlowRateMax();
+  }
 
-    getWaterCapacity() {
-        return this.turbinePeripheral.fluidTank().output().maxAmount();
-    }
+  setTargetFlowRate(rate: number) {
+    this.turbinePeripheral.setFluidFlowRateMax(rate);
+  }
 
-    getFlowRate() {
-        return this.turbinePeripheral.fluidTank().flowLastTick();
-    }
+  getFlowRateLimit() {
+    return this.turbinePeripheral.getFluidFlowRateMaxMax();
+  }
 
-    getTargetFlowRate() {
-        return this.turbinePeripheral.fluidTank().nominalFlowRate();
-    }
+  getIsCoilEngaged() {
+    return this.turbinePeripheral.getInductorEngaged();
+  }
 
-    setTargetFlowRate(rate: number) {
-        this.turbinePeripheral.fluidTank().setNominalFlowRate(rate);
-    }
-
-    getFlowRateLimit() {
-        return this.turbinePeripheral.fluidTank().flowRateLimit();
-    }
-
-    getIsCoilEngaged() {
-        return this.turbinePeripheral.coilEngaged();
-    }
-
-    setIsCoilEngaged(engaged: boolean) {
-        this.turbinePeripheral.setCoilEngaged(engaged);
-    }
+  setIsCoilEngaged(engaged: boolean) {
+    this.turbinePeripheral.setInductorEngaged(engaged);
+  }
 }

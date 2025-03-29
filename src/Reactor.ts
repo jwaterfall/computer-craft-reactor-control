@@ -1,26 +1,14 @@
 import { ReactorPeripheral } from "./Peripheral";
 
 export class Reactor {
-    private reactorPeripheral: ReactorPeripheral;
-
-    constructor(private name: string) {
-        this.reactorPeripheral = peripheral.wrap(name) as ReactorPeripheral;
-    }
+    constructor(private reactorPeripheral: ReactorPeripheral) {}
 
     getName() {
-        return this.name;
-    }
-
-    getApiVersion() {
-        return this.reactorPeripheral.apiVersion();
-    }
-
-    getIsConnected() {
-        return this.reactorPeripheral.connected();
+        return peripheral.getName(this.reactorPeripheral);
     }
 
     getIsActive() {
-        return this.reactorPeripheral.active();
+        return this.reactorPeripheral.getActive();
     }
 
     setIsActive(active: boolean) {
@@ -28,110 +16,87 @@ export class Reactor {
     }
 
     getEnergyStored() {
-        return this.reactorPeripheral.battery().stored();
+        return this.reactorPeripheral.getEnergyStored();
     }
 
     getEnergyCapacity() {
-        return this.reactorPeripheral.battery().capacity();
+        return this.reactorPeripheral.getEnergyCapacity();
     }
 
     getEnergyProduced() {
-        return this.reactorPeripheral.battery().producedLastTick();
+        return this.reactorPeripheral.getEnergyProducedLastTick();
     }
 
     getWaterStored() {
-        return this.reactorPeripheral.coolantTank().coldFluidAmount();
+        return this.reactorPeripheral.getCoolantAmount();
     }
 
     getSteamStored() {
-        return this.reactorPeripheral.coolantTank().hotFluidAmount();
+        return this.reactorPeripheral.getHotFluidAmount();
     }
 
     getCoolantCapacity() {
-        return this.reactorPeripheral.coolantTank().capacity();
+        return this.reactorPeripheral.getCoolantAmountMax();
     }
 
     getCoolantTransitioned() {
-        return this.reactorPeripheral.coolantTank().transitionedLastTick();
-    }
-
-    getCoolantMaxTransitioned() {
-        return this.reactorPeripheral.coolantTank().maxTransitionedLastTick();
-    }
-
-    dumpCoolant() {
-        this.reactorPeripheral.coolantTank().dump();
+        return this.reactorPeripheral.getHotFluidProducedLastTick();
     }
 
     getFuelCapacity() {
-        return this.reactorPeripheral.fuelTank().capacity();
-    }
-
-    getReactantStored() {
-        return this.reactorPeripheral.fuelTank().totalReactant();
+        return this.reactorPeripheral.getFuelAmountMax();
     }
 
     getFuelStored() {
-        return this.reactorPeripheral.fuelTank().fuel();
+        return this.reactorPeripheral.getFuelAmount();
     }
 
     getWasteStored() {
-        return this.reactorPeripheral.fuelTank().waste();
+        return this.reactorPeripheral.getWasteAmount();
     }
 
     ejectWaste() {
-        this.reactorPeripheral.fuelTank().ejectWaste();
+        this.reactorPeripheral.doEjectWaste();
     }
 
     getFuelReactivity() {
-        return this.reactorPeripheral.fuelTank().fuelReactivity();
+        return this.reactorPeripheral.getFuelReactivity();
     }
 
     getFuelConsumed() {
-        return this.reactorPeripheral.fuelTank().burnedLastTick();
+        return this.reactorPeripheral.getFuelConsumedLastTick();
     }
 
     getControlRodCount() {
-        return this.reactorPeripheral.controlRodCount();
+        return this.reactorPeripheral.getNumberOfControlRods();
     }
 
     setAllControlRods(level: number) {
+        print("Setting all control rods to level: " + level);
         this.reactorPeripheral.setAllControlRodLevels(level);
     }
 
-    getControlRodIsValid(index: number) {
-        return this.reactorPeripheral.getControlRod(0).valid();
-    }
-
     getControlRodLevel(index: number) {
-        return this.reactorPeripheral.getControlRod(index).level();
+        return this.reactorPeripheral.getControlRodLevel(index);
     }
 
     setControlRodLevel(index: number, level: number) {
-        this.reactorPeripheral.getControlRod(index).setLevel(level);
+        this.reactorPeripheral.setControlRodLevel(index, level);
     }
 
     getControlRodName(index: number) {
-        return this.reactorPeripheral.getControlRod(index).name();
+        return this.reactorPeripheral.getControlRodName(index);
     }
 
     setControlRodName(index: number, name: string) {
-        this.reactorPeripheral.getControlRod(index).setName(name);
+        this.reactorPeripheral.setControlRodName(index, name);
     }
 
     getFuelTemperature() {
-        return this.reactorPeripheral.fuelTemperature();
+        return this.reactorPeripheral.getFuelTemperature();
     }
 
     getCasingTemperature() {
-        return this.reactorPeripheral.casingTemperature();
-    }
-
-    getStackTemperature() {
-        return this.reactorPeripheral.stackTemperature();
-    }
-
-    getAmbientTemperature() {
-        return this.reactorPeripheral.ambientTemperature();
+        return this.reactorPeripheral.getCasingTemperature();
     }
 }
