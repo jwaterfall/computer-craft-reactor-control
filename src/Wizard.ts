@@ -2,7 +2,7 @@ import { Config, saveConfig } from "./Config";
 import { Monitor } from "./Monitor";
 import { Reactor } from "./Reactor";
 import { Turbine } from "./Turbine";
-import { getTextPage } from "./Page";
+import { getTextPage, getTurbineAutounePage } from "./Page";
 import { Page } from "./Components";
 import {
   findMonitorPeripherals,
@@ -106,29 +106,35 @@ function autotuneTurbine(
   turbine: Turbine,
   targetRPM = 1800
 ): number {
+  const startTime = os.epoch("utc");
+
   const maxFlowRate = 120000;
   const minStep = 1;
   const maxStep = 10000;
   const stableThresholdPercentage = 0.001;
-  const requiredStableIterations = 10;
+  const requiredStableSamples = 20; // Increased buffer size
+  const dampingFactor = 0.5;
 
-  const Kp = 1;
+  let Kp = 1;
+  let stabilityBuffer: number[] = [];
+  let hasBegun = false;
 
   turbine.setIsActive(true);
   turbine.setIsCoilEngaged(true);
   turbine.setTargetFlowRate(0);
-
-  let stableIterationCount = 0;
-  let hasBegun = false;
 
   while (true) {
     sleep(1);
 
     const targetFlowRate = turbine.getTargetFlowRate();
     const actualRPM = turbine.getRotorSpeed();
+    const error = targetRPM - actualRPM;
 
+    // Skip waiting phase if already near target RPM
     if (!hasBegun) {
-      if (actualRPM >= 50) {
+      if (actualRPM < targetRPM * 0.1) {
+        hasBegun = true;
+      } else {
         renderPageOnAllMonitors(
           getTextPage(
             "Setup Wizard",
@@ -136,40 +142,41 @@ function autotuneTurbine(
           ),
           monitors
         );
-
         continue;
-      } else {
-        hasBegun = true;
       }
     }
 
-    if (
-      Math.abs(actualRPM - targetRPM) <
-      targetRPM * stableThresholdPercentage
-    ) {
-      stableIterationCount++;
-
-      if (stableIterationCount >= requiredStableIterations) {
-        return targetFlowRate;
-      }
-    } else {
-      stableIterationCount = 0;
+    stabilityBuffer.push(actualRPM);
+    if (stabilityBuffer.length > requiredStableSamples) {
+      stabilityBuffer.shift();
     }
 
-    const error = targetRPM - actualRPM;
-    const step = Math.min(Math.max(Kp * Math.abs(error), minStep), maxStep);
+    const isStable =
+      stabilityBuffer.length === requiredStableSamples &&
+      stabilityBuffer.every(
+        (rpm) =>
+          Math.abs(rpm - targetRPM) < targetRPM * stableThresholdPercentage
+      );
+
+    if (isStable) {
+      return targetFlowRate;
+    }
+
+    Kp = Math.max(0.5, Math.min(2, Math.abs(error) / 500));
+
+    let stepSize = Kp * Math.abs(error) * dampingFactor;
+    stepSize = Math.min(Math.max(stepSize, minStep), maxStep);
 
     if (actualRPM >= targetRPM) {
-      turbine.setTargetFlowRate(Math.max(targetFlowRate - step, 0));
+      turbine.setTargetFlowRate(Math.max(targetFlowRate - stepSize, 0));
     } else {
-      turbine.setTargetFlowRate(Math.min(targetFlowRate + step, maxFlowRate));
+      turbine.setTargetFlowRate(
+        Math.min(targetFlowRate + stepSize, maxFlowRate)
+      );
     }
 
     renderPageOnAllMonitors(
-      getTextPage(
-        "Setup Wizard",
-        `Auto-tuning turbine ${turbine.getName()}. Step: ${step}, Target RPM: ${targetRPM}, Actual RPM: ${actualRPM}, Target Flow Rate: ${targetFlowRate}`
-      ),
+      getTurbineAutounePage(turbine, targetRPM, startTime),
       monitors
     );
   }

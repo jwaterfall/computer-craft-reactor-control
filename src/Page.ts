@@ -171,6 +171,62 @@ export function getTurbinePage(turbine: Turbine, event?: MonitorTouchEvent) {
   );
 }
 
+export function getTurbineAutounePage(
+  turbine: Turbine,
+  targetRPM: number,
+  startTime: number
+) {
+  const actualRPM = turbine.getRotorSpeed();
+  const maxFlowRate = turbine.getTargetFlowRate();
+  const error = actualRPM - targetRPM;
+
+  const elapsedTimeInSeconds = Math.floor((os.epoch("utc") - startTime) / 1000);
+
+  const hours = Math.floor(elapsedTimeInSeconds / 3600);
+  const minutes = Math.floor((elapsedTimeInSeconds % 3600) / 60);
+  const seconds = elapsedTimeInSeconds % 60;
+  const formattedTime = `${hours}:${minutes
+    .toString()
+    .padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+
+  let rpmColor = colors.red;
+  if (Math.abs(error) < targetRPM * 0.001) {
+    rpmColor = colors.green; // Within 0.1% of target
+  } else if (Math.abs(error) < targetRPM * 0.05) {
+    rpmColor = colors.orange; // Within 5% of target
+  }
+
+  return new Page(
+    "Turbine Tuning",
+    new VerticalLayout([
+      new ProgressBar(
+        actualRPM,
+        targetRPM,
+        "Target RPM vs Actual RPM",
+        rpmColor,
+        0.75,
+        1.25
+      ),
+      new ProgressBar(
+        maxFlowRate,
+        turbine.getFlowRateLimit(),
+        "Max flow rate",
+        colors.blue
+      ),
+      new Section(
+        "Statistics",
+        new VerticalLayout([
+          new Text(`Target RPM: ${floor(targetRPM)}`),
+          new Text(`Actual RPM: ${floor(actualRPM)}`),
+          new Text(`RPM Error: ${floor(error)}`),
+          new Text(`Max flow rate: ${floor(maxFlowRate)} mB/t`),
+          new Text(`Elapsed Time: ${formattedTime}`),
+        ])
+      ),
+    ])
+  );
+}
+
 export function getTextPage(title: string, text: string) {
   return new Page(title, new Text(text));
 }
